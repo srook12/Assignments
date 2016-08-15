@@ -1,0 +1,6 @@
+Name: Stephen Rook
+
+Years at SSA: Almost 1
+
+I have a primarily academic background in programming. I have a BS and MS in Computer Science. In college, I programmed mostly
+with Java, but I have experience with C, C++, and some scripting languages (Javascript, Perl, PHP, and Python).
