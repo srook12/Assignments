@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Random;
 
 public class DiceGame {
+	// Number of dice in play
+	public static final int NUM_DICE = 1;
+	
 	// Controls how many times we play the game
 	public static final int NUM_GAMES_TO_PLAY = 20;
 	
@@ -81,7 +84,7 @@ public class DiceGame {
 		return statsList;
 	}
 	
-	// Utitlity method to display the statistics
+	// Utility method to display the statistics
 	public static void printStatistics(List<Object> statsList) {
 		System.out.println("Minimum score: " + statsList.get(POS_MIN_SCORE));
 		System.out.println("Maximum score: " + statsList.get(POS_MAX_SCORE));
