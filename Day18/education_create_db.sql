@@ -1,6 +1,6 @@
--- Day 17 script
+-- Script to set up the education database
 
--- Drop the tables ?if they exist
+-- Drop the tables if they exist
 drop table if exists major_class_relationship;
 drop table if exists student_class_relationship;
 drop table if exists assignment;
@@ -10,17 +10,21 @@ drop table if exists instructor;
 drop table if exists major;
 drop table if exists grade;
 
--- Create the tables and triggers
+-- Drop the procedures if they exist
+drop procedure if exists GetStudentMajor;
+drop procedure if exists ClassesRemaining;
+drop procedure if exists InsertStudent;
+drop procedure if exists InsertInstructor;
+
+-- Create the tables
 create table student (
 	id int primary key,
 	first_name varchar(30) not null,
 	last_name varchar(30) not null,
 	gpa decimal(5, 1) not null,
-	sat int check(sat between 400 AND 1600),
+	sat int, 
 	major_id int	
 );
-
--- create trigger tr_sat_insert after insert on Student 
 
 create table major (
 	id int primary key auto_increment, 
@@ -71,7 +75,63 @@ create table student_class_relationship (
 	class_id int not null
 );
 
+-- Create procedures
+delimiter //
+
+create procedure GetStudentMajor(in studentId int, out majorId int)
+begin
+  select major_id into majorId from student where id = studentId;
+end //
+
+create procedure ClassesRemaining(in studentId int)
+begin
+  declare majorId int;
+  call GetStudentMajor(studentId, majorId);
+
+  select id as CRN, concat(prefix, ' ', number) as Class
+  from class
+  where id in (select mcr.class_id 
+               from major_class_relationship mcr
+               where mcr.major_id = majorId and mcr.class_id not in
+	        (select scr.class_id
+	         from student_class_relationship scr
+	         where scr.student_id = studentId))
+  order by id;
+end //
+
+-- Checks whether SAT score is valid and whether the student can choose his/her preferred major based on SAT score
+create procedure InsertStudent(in id_in int, in first_name_in varchar(30), in last_name_in varchar(30), in gpa_in decimal(5, 1), in sat_in int, in major_in int)
+begin
+  declare speciality condition for sqlstate '45000';
+  declare minSATScore int;
+
+  select min_sat into minSATScore from major where id = major_in;
+
+  if sat_in not between 400 and 1600 then
+    signal sqlstate '45000' set message_text = 'SAT score must be between 400 and 1600!';
+  elseif sat_in < minSATScore then
+    signal sqlstate '45000' set message_text = 'SAT score is not high enough to choose this major!';
+  end if;
+
+  insert into student (id, first_name, last_name, gpa, sat, major_id) values (id_in, first_name_in, last_name_in, gpa_in, sat_in, major_in);
+end //
+
+-- Checks whether years of experience is greater than 0
+create procedure InsertInstructor(in first_name_in varchar(30), in last_name_in varchar(30), in yrs_exp_in int, in tenured_in tinyint, in major_id_in int) 
+begin
+  declare speciality condition for sqlstate '45000';
+
+  if yrs_exp_in <= 0 then
+    signal sqlstate '45000' set message_text = 'Years of experience must be more than 0!';
+  end if;
+
+  insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values (first_name_in, last_name_in, yrs_exp_in, tenured_in, major_id_in);
+end //
+
+delimiter ;
+
 -- Foreign key constraints
+
 alter table instructor add constraint fk_instructor_major foreign key (major_id) references major (id);
 alter table class add constraint fk_class_instructor foreign key (instructor_id) references instructor (id);
 alter table assignment add constraint fk_assignment_student foreign key (student_id) references student(id);
@@ -103,32 +163,41 @@ insert into major (name, min_sat) values ('Education', 900);
 insert into major (name, min_sat) values ('General Studies', 500);
 
 -- Insertions into Instructor
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Jar Jar', 'Binks', 3, 0, 7);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('George', 'Feeney', 20, 1, 6);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Edna', 'Kraboppel', 15, 0, 4);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Stephen', 'Hawking', 18, 1, 4);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Temperance', 'Brennen', 2, 0, 4);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Luke', 'Skywalker', 2, 0, 1);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Norville', 'Rogers', 7, 0, 7);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Ren', 'Hoek', 16, 1, 2);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Mortimer', 'Blotchkins', 5, 0, 3);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Linus', 'van Pelt', 30, 1, 5);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Lucy', 'van Pelt', 25, 1, 6);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Oroku', 'Saki', 16, 1, 5);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Baxter', 'Stockman', 11, 0, 2);
-insert into instructor (first_name, last_name, yrs_exp, tenured, major_id) values ('Jack', 'Sprat', 1, 0, 3);
+call InsertInstructor('Jar Jar', 'Binks', 3, 0, 7);
+call InsertInstructor('George', 'Feeney', 20, 1, 6);
+call InsertInstructor('Edna', 'Kraboppel', 15, 0, 4);
+call InsertInstructor('Stephen', 'Hawking', 18, 1, 4);
+call InsertInstructor('Temperance', 'Brennen', 2, 0, 4);
+call InsertInstructor('Luke', 'Skywalker', 2, 0, 1);
+call InsertInstructor('Norville', 'Rogers', 7, 0, 7);
+call InsertInstructor('Ren', 'Hoek', 16, 1, 2);
+call InsertInstructor('Mortimer', 'Blotchkins', 5, 0, 3);
+call InsertInstructor('Linus', 'van Pelt', 30, 1, 5);
+call InsertInstructor('Lucy', 'van Pelt', 25, 1, 6);
+call InsertInstructor('Oroku', 'Saki', 16, 1, 5);
+call InsertInstructor('Baxter', 'Stockman', 11, 0, 2);
+call InsertInstructor('Jack', 'Sprat', 1, 0, 3);
+
+-- These insertions will fail because years of experience is invalid
+call InsertInstructor('Bowser', 'Koopa', 0, 0, 4);
+call InsertInstructor('Steve', 'Austin', -1, 0, 3);
 
 -- Insertions into Student
-insert into student values(100, 'Eric','Ephram', 3.3, 1100, 3);
-insert into student values(110, 'Greg','Gould', 3.6, 980, 6);
-insert into student values(120, 'Adam','Ant', 2.8, 1200, 6);
-insert into student values(130, 'Howard','Hess', 3.0, 1250, 5);
-insert into student values(140, 'Charles','Caldwell', 4.0, 1600, 4);
-insert into student values(150, 'James','Joyce', 2.3, 1050, 2);
-insert into student values(160, 'Doug','Dumas', 2.8, 1125, 2);
-insert into student values(170, 'Kevin','Kraft', 3.0, 1375, 4);
-insert into student values(180, 'Frank','Fountain', 3.2, 600, 7);
-insert into student values(190,'Brian','Biggs', 3.9, 1500, 4);
+call InsertStudent(100, 'Eric','Ephram', 3.3, 1100, 3);
+call InsertStudent(110, 'Greg','Gould', 3.6, 980, 6);
+call InsertStudent(120, 'Adam','Ant', 2.8, 1200, 6);
+call InsertStudent(130, 'Howard','Hess', 3.0, 1350, 5);
+call InsertStudent(140, 'Charles','Caldwell', 4.0, 1600, 4);
+call InsertStudent(150, 'James','Joyce', 2.3, 1050, 2);
+call InsertStudent(160, 'Doug','Dumas', 2.8, 1125, 2);
+call InsertStudent(170, 'Kevin','Kraft', 3.0, 1375, 4);
+call InsertStudent(180, 'Frank','Fountain', 3.2, 600, 7);
+call InsertStudent(190, 'Brian','Biggs', 3.9, 1500, 4);
+
+-- These inserts will fail because of failure to satisfy the preconditions
+call InsertStudent(200, 'Fred', 'Rogers', 4.0, 399, 1);
+call InsertStudent(205, 'John', 'Doe', 3.1, 1601, 2);
+call InsertStudent(210, 'Scooby', 'Doo', 4.0, 800, 4);
 
 -- Insertions into class
 insert into class (prefix, number, instructor_id) values ('English', 101, 1);
