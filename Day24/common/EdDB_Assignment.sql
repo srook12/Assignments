@@ -183,6 +183,31 @@ INSERT major_class_relationship (major_id, class_id) VALUES(4,20403); -- Math | 
 INSERT major_class_relationship (major_id, class_id) VALUES(4,20404); -- Math | Mat 204
 INSERT major_class_relationship (major_id, class_id) VALUES(4,30101); -- Math | His 101
 
+INSERT major_class_relationship (major_id, class_id) VALUES(5,10101);
+INSERT major_class_relationship (major_id, class_id) VALUES(5,10102);
+INSERT major_class_relationship (major_id, class_id) VALUES(5,20201);
+INSERT major_class_relationship (major_id, class_id) VALUES(5,20202);
+INSERT major_class_relationship (major_id, class_id) VALUES(5,20203);
+INSERT major_class_relationship (major_id, class_id) VALUES(5,20204);
+INSERT major_class_relationship (major_id, class_id) VALUES(5,40311);
+INSERT major_class_relationship (major_id, class_id) VALUES(5,40312);
+
+INSERT major_class_relationship (major_id, class_id) VALUES(6,10101);
+INSERT major_class_relationship (major_id, class_id) VALUES(6,10102);
+INSERT major_class_relationship (major_id, class_id) VALUES(6,20201);
+INSERT major_class_relationship (major_id, class_id) VALUES(6,20202);
+INSERT major_class_relationship (major_id, class_id) VALUES(6,20203);
+INSERT major_class_relationship (major_id, class_id) VALUES(6,60221);
+INSERT major_class_relationship (major_id, class_id) VALUES(6,60222);
+INSERT major_class_relationship (major_id, class_id) VALUES(6,60223);
+
+INSERT major_class_relationship (major_id, class_id) VALUES(7,10101);
+INSERT major_class_relationship (major_id, class_id) VALUES(7,20201);
+INSERT major_class_relationship (major_id, class_id) VALUES(7,30101);
+INSERT major_class_relationship (major_id, class_id) VALUES(7,40311);
+INSERT major_class_relationship (major_id, class_id) VALUES(7,50101);
+INSERT major_class_relationship (major_id, class_id) VALUES(7,60221);
+
 -- Classes taken by a student
-INSERT student_class_relationship (student_id,class_id) VALUES (100,10101);
+
 

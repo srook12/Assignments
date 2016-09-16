@@ -3,12 +3,16 @@ package ssa;
 // Allows a blank Student object to be created. Values can
 // then be set before sending to the DB.
 public class Student {
+	public static final int NULL = -1;
+	
 	private int id;
 	private String first_name;
 	private String last_name;
 	private int sat;
 	private double gpa;
-	private int major_id;
+	
+	private int intended_major_id = NULL;
+	private int major_id = NULL;
 	private String major_description;
 	
 	public int getId() {
@@ -44,8 +48,7 @@ public class Student {
 			this.sat = sat;
 			return true;
 		} 
-			
-		
+					
 		return false;	
 	}
 	
@@ -61,6 +64,14 @@ public class Student {
 		}
 		
 		return false;
+	}
+	
+	public int getIntendedMajor_id() {
+		return intended_major_id;
+	}
+	
+	public void setIntendedMajor_id(int major_id) {
+		this.intended_major_id = major_id;
 	}
 	
 	public int getMajor_id() {
